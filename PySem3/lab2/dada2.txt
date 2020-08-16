@@ -1,0 +1,5 @@
+1) wynik "Pi"=4.0, prawdziwy wynik pi =3.1415
+4) wynik "Pi"=3.66666666667, prawdziwy wynik pi =3.1415
+6) wynik "Pi"=3.46666666667, prawdziwy wynik pi =3.1415
+8) wynik "Pi"=3.32380952381, prawdziwy wynik pi =3.1415
+10) wynik "Pi"=3.2126984127, prawdziwy wynik pi =3.1415
