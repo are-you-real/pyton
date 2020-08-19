@@ -1,83 +1,77 @@
 import numpy as np
 
-class NeuralNetwork():
-
-    def __init__(self):
+class NeuralNetwor(y):
+    def __init__(self,y):
         # Seed the random number generator
         np.random.seed(1)
 
-        # Set synaptic weights to a 3x1 matrix,
-        # with values from -1 to 1 and mean 0
-        self.synaptic_weights = 2 * np.random.random((3, 1)) - 1
+        # randomly initialize our weights with mean 0
+        self.syn0 = 2*np.random.random((4,3)) - 1
+        self.syn1 = 2*np.random.random(4,1)) - 1
+        print('syn0:'+str(self.syn0))
+        print('syn1:'+str(self.syn1))
 
-    def sigmoid(self, x):
-        """
-        Takes in weighted sum of the inputs and normalizes
-        them through between 0 and 1 through a sigmoid function
-        """
-        return 1 / (1 + np.exp(-x))
+    def nonlin(self,x,deriv=False):
+    	if(deriv==True):
+    	    return x*(1-x)
 
-    def sigmoid_derivative(self, x):
-        """
-        The derivative of the sigmoid function used to
-        calculate necessary weight adjustments
-        """
-        return x * (1 - x)
+    	return 1/(1+np.exp(-x))
 
-    def train(self, training_inputs, training_outputs, training_iterations):
-        """
-        We train the model through trial and error, adjusting the
-        synaptic weights each time to get a better result
-        """
-        for iteration in range(training_iterations):
-            # Pass training set through the neural network
-            output = self.think(training_inputs)
+    def think(self,X):
+        l0 = X
+        l1 = self.nonlin(np.dot(l0,self.syn0))
+        l2 = self.nonlin(np.dot(l1,self.syn1))
+        return l2
 
-            # Calculate the error rate
-            error = training_outputs - output
+    def train(self,X,y):
 
-            # Multiply error by input and gradient of the sigmoid function
-            # Less confident weights are adjusted more through the nature of the function
-            adjustments = np.dot(training_inputs.T, error * self.sigmoid_derivative(output))
 
-            # Adjust synaptic weights
-            self.synaptic_weights += adjustments
 
-    def think(self, inputs):
-        """
-        Pass inputs through the neural network to get output
-        """
+        for j in range(60000):
 
-        inputs = inputs.astype(float)
-        output = self.sigmoid(np.dot(inputs, self.synaptic_weights))
-        return output
+        	# Feed forward through layers 0, 1, and 2
+
+            l0 = X
+            l1 = self.nonlin(np.dot(l0,self.syn0))
+            l2 = self.nonlin(np.dot(l1,self.syn1))
+
+            # how much did we miss the target value?
+            l2_error = y - l2
+
+            if (j% 10000) == 0:
+                print ("Error:" + str(np.mean(np.abs(l2_error))))
+
+            # in what direction is the target value?
+            # were we really sure? if so, don't change too much.
+            l2_delta = l2_error*self.nonlin(l2,deriv=True)
+
+            # how much did each l1 value contribute to the l2 error (according to the weights)?
+            l1_error = l2_delta.dot(self.syn1.T)
+
+            # in what direction is the target l1?
+            # were we really sure? if so, don't change too much.
+            l1_delta = l1_error * self.nonlin(l1,deriv=True)
+
+            self.syn1 += l1.T.dot(l2_delta)
+            self.syn0 += l0.T.dot(l1_delta)
 
 
 if __name__ == "__main__":
-
-    # Initialize the single neuron neural network
-    neural_network = NeuralNetwork()
-
-    print("Random starting synaptic weights: ")
-    print(neural_network.synaptic_weights)
-
-    # The training set, with 4 examples consisting of 3
-    # input values and 1 output value
     training_inputs = np.array([[0,0,1],
                                 [0,1,0],
                                 [0,1,1],
-                                [1,0,0],
-                                [1,0,1],
-                                [1,1,1]])
+                                [1,0,0]])
 
-    training_outputs = np.array([[1,1,0,1,0,1]]).T
+    training_outputs = np.array([[1],
+    			                 [1],
+    			                 [0],
+    			                 [1]])
 
-    # Train the neural network
-    neural_network.train(training_inputs, training_outputs, 10000)
+    neural_network = NeuralNetwor()
 
-    print("Synaptic weights after training: ")
-    print(neural_network.synaptic_weights)
+    neural_network.train(training_inputs, training_outputs)
 
+    '''
     A = str(input("Input 1: "))
     B = str(input("Input 2: "))
     C = str(input("Input 3: "))
@@ -85,3 +79,4 @@ if __name__ == "__main__":
     print("New situation: input data = ", A, B, C)
     print("Output data: ")
     print(neural_network.think(np.array([A, B, C])))
+    '''
